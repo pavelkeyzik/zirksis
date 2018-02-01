@@ -69,9 +69,11 @@ void encrypt(char *enteredFile, char *outputFile) {
 
         write(outf, ctext, outlen);
     }
+
+    fclose(pub_key_file);
 }
 
-void decrypt(char *enteredFile, char *outputFile) {
+void decrypt(char *enteredFile, char *outputFile, char *passwordPhrase) {
     RSA *privKey = NULL;
     FILE *priv_key_file;
     unsigned char *ptext, *ctext;
@@ -82,7 +84,7 @@ void decrypt(char *enteredFile, char *outputFile) {
 
     /* Открываем ключевой файл и считываем секретный ключ */
     priv_key_file = fopen(PRIVAT, "rb");
-    privKey = PEM_read_RSAPrivateKey(priv_key_file, NULL, NULL, NULL);
+    privKey = PEM_read_RSAPrivateKey(priv_key_file, NULL, NULL, passwordPhrase);
     if(privKey == NULL) {
         printf("privKey is NUULLLL");
         exit(-1);
@@ -92,7 +94,7 @@ void decrypt(char *enteredFile, char *outputFile) {
     int key_size = RSA_size(privKey);
     ctext = malloc(key_size);
     ptext = malloc(key_size);
-
+    
     unsigned long inlen = 0, outlen = 0;
 
     /* Дешифруем файл */
@@ -105,4 +107,6 @@ void decrypt(char *enteredFile, char *outputFile) {
         
         write(outf, ptext, outlen);
     }
+
+    fclose(priv_key_file);
 }
