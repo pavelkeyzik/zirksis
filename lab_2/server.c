@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+
+int searchText(char *text){
+  system("grep -r 'Hello' ./files/*.txt > founded.txt");
+  return 0;
+}
 
 int main()
 {
@@ -20,7 +26,7 @@ int main()
   }
 
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(3426);
+  addr.sin_port = htons(3423);
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   if (bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0)
@@ -45,7 +51,7 @@ int main()
       if (bytes_read <= 0)
         break;
 
-      printf("MESSAGE FROM CLIENT: %s", buf);
+      searchText(buf);
       send(sock, buf, bytes_read, 0);
     }
     close(sock);
