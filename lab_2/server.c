@@ -6,13 +6,23 @@
 #include <unistd.h>
 #include <string.h>
 
-int searchText(char *text){
-  system("grep -r 'Hello' ./files/*.txt > founded.txt");
+int searchText(char *text)
+{
+  char first[] = "grep -r '";
+  char second[sizeof(text)];
+  strcpy(second, text);
+  char third[] = "' ./files/*.txt > founded.txt";
+
+  strncat(first, second, sizeof(second));
+  strncat(first, third, sizeof(third));
+
+  system(first);
   return 0;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+  int app_port = atoi(argv[1]);
   int sock, listener;
   struct sockaddr_in addr;
   char buf[1024];
@@ -26,9 +36,11 @@ int main()
   }
 
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(3423);
+  addr.sin_port = htons(app_port);
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
+  printf("Server listen on port %d...\n", app_port);
+  fflush(stdout);
   if (bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0)
   {
     perror("bind");

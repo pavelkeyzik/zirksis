@@ -5,11 +5,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
-char message[] = "Hello\n";
-char buf[sizeof(message)];
-
-int main()
+int main(int argc, char **argv)
 {
+  int server_port = atoi(argv[1]);
+  char message[10];
+  printf("Введите строку для поиска: ");
+  scanf("%s", message);
+  char buf[sizeof(message)];
   int sock;
   struct sockaddr_in addr;
   sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -21,7 +23,7 @@ int main()
   }
 
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(3423);
+  addr.sin_port = htons(server_port);
   addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
   if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
@@ -32,7 +34,6 @@ int main()
 
   send(sock, message, sizeof(message), 0);
   recv(sock, buf, sizeof(message), 0);
-  printf("%s", buf);
   close(sock);
 
   return 0;
