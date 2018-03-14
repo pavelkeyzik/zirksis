@@ -4,14 +4,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "transfer-methods.c"
+#include "constants.c"
+#include <jansson.h>
 
 int main(int argc, char **argv)
 {
   int server_port = atoi(argv[1]);
-  char message[10];
+  char message[BUFF_SIZE];
   printf("Введите строку для поиска: ");
   scanf("%s", message);
-  char buf[sizeof(message)];
+  char buf[BUFF_SIZE];
   int sock;
   struct sockaddr_in addr;
   sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -32,9 +35,28 @@ int main(int argc, char **argv)
     exit(2);
   }
 
-  send(sock, message, sizeof(message), 0);
-  recv(sock, buf, sizeof(message), 0);
-  close(sock);
+  int flag = 1;
 
+  while(flag) {
+    int meFlag = 1;
+    int heFlag = 1;
+
+    while(meFlag) {
+      send_all(sock, message, BUFF_SIZE);
+      printf("ME: %s\n", message);
+      fflush(stdout);
+      meFlag = 0;
+    }
+
+    while(heFlag) {
+      printf("Wait for data..\n");
+      recv_all(sock, buf, BUFF_SIZE);
+      printf("SERVER: %s\n", buf);
+      fflush(stdout);
+      heFlag = 0;
+    }
+    close(sock);
+    flag = 0;
+  }
   return 0;
 }

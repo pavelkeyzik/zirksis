@@ -5,8 +5,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include "transfer-methods.c"
+#include "constants.c"
+#include <jansson.h>
 
-int searchText(char *text)
+char *searchText(char *text)
 {
   char first[] = "grep -r '";
   char second[sizeof(text)];
@@ -17,7 +20,7 @@ int searchText(char *text)
   strncat(first, third, sizeof(third));
 
   system(first);
-  return 0;
+  return "Hello";
 }
 
 int main(int argc, char **argv)
@@ -25,7 +28,7 @@ int main(int argc, char **argv)
   int app_port = atoi(argv[1]);
   int sock, listener;
   struct sockaddr_in addr;
-  char buf[1024];
+  char buf[BUFF_SIZE];
   int bytes_read;
   listener = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -57,17 +60,30 @@ int main(int argc, char **argv)
       perror("accept");
       exit(3);
     }
-    while (1)
-    {
-      bytes_read = recv(sock, buf, 1024, 0);
-      if (bytes_read <= 0)
-        break;
+    int flag = 1;
+    char *response;
 
-      searchText(buf);
-      send(sock, buf, bytes_read, 0);
+    while(flag) {
+      int meFlag = 1;
+      int heFlag = 1;
+
+      while(meFlag) {
+        recv_all(sock, buf, BUFF_SIZE);
+        response = searchText(buf);
+        printf("CLIENT: %s\n", buf);
+        fflush(stdout);
+        meFlag = 0;
+      }
+
+      while(heFlag) {
+        send_all(sock, response, BUFF_SIZE);
+        printf("ME: '%s'\n", response);
+        fflush(stdout);
+        heFlag = 0;
+      }
+      flag = 0;
     }
-    close(sock);
   }
-
+  close(sock);
   return 0;
 }
