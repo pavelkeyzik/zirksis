@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "transfer-methods.c"
 #include "constants.c"
+#include "json-methods.c"
 #include <jansson.h>
 
 int main(int argc, char **argv)
@@ -51,7 +52,8 @@ int main(int argc, char **argv)
     while(heFlag) {
       printf("Wait for data..\n");
       recv_all(sock, buf, BUFF_SIZE);
-      printf("SERVER: %s\n", buf);
+      printf("\n RESULT FROM SERVERS: \n------------\n%s\n", buf);
+      json_t *obj = load_json(buf);
       fflush(stdout);
       heFlag = 0;
     }

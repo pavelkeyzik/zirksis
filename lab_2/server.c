@@ -7,6 +7,7 @@
 #include <string.h>
 #include "transfer-methods.c"
 #include "constants.c"
+#include "json-methods.c"
 #include <jansson.h>
 
 char *searchText(char *text)
@@ -20,7 +21,21 @@ char *searchText(char *text)
   strncat(first, third, sizeof(third));
 
   system(first);
-  return "Hello";
+
+  json_t *obj = json_object(), *arr = json_array();
+  FILE *file;
+  char *string;
+  char str[255];
+  file = fopen("founded.txt", "r");
+
+  while(feof(file) == 0) {
+    fscanf(file, "%[^\n]\n", str);
+    json_array_append(arr, json_string(str));
+  }
+  json_object_set(obj, "SERVER_1", arr);
+  fclose(file);
+  char *jsonParsed = json_dumps(obj, sizeof(obj));
+  return jsonParsed;
 }
 
 int main(int argc, char **argv)
