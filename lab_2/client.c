@@ -8,6 +8,7 @@
 #include "constants.c"
 #include "json-methods.c"
 #include <jansson.h>
+#include "openssl-methods.c"
 
 int main(int argc, char **argv)
 {
@@ -18,12 +19,30 @@ int main(int argc, char **argv)
   char buf[BUFF_SIZE];
   int sock;
   struct sockaddr_in addr;
+
+  SSL_CTX *sslctx;
+  SSL *cSSL;
+  InitializeSSL();
+
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
   if (sock < 0)
   {
     perror("socket");
     exit(1);
+  }
+
+  sslctx = SSL_CTX_new( SSLv23_server_method());
+  SSL_CTX_set_options(sslctx, SSL_OP_SINGLE_DH_USE);
+  int use_cert = SSL_CTX_use_certificate_file(sslctx, "/serverCertificate.pem" , SSL_FILETYPE_PEM);
+  int use_prv = SSL_CTX_use_PrivateKey_file(sslctx, "/serverCertificate.pem", SSL_FILETYPE_PEM);
+  cSSL = SSL_new(sslctx);
+  SSL_set_fd(cSSL, sock);
+  int ssl_err = SSL_accept(cSSL);
+  if(ssl_err <= 0)
+  {
+      //Error occurred, log and close down ssl
+      ShutdownSSL(cSSL);
   }
 
   addr.sin_family = AF_INET;
